@@ -220,11 +220,13 @@ final class VideoClient: ObservableObject {
             sampleBufferOut: &sample
         ) == noErr, let sample else { return }
 
-        guard let layer = displayLayer else { return }
-        if layer.status == .failed {
-            layer.flush()
+        DispatchQueue.main.async { [weak self] in
+            guard let layer = self?.displayLayer else { return }
+            if layer.status == .failed {
+                layer.flush()
+            }
+            layer.enqueue(sample)
         }
-        layer.enqueue(sample)
 
         frames += 1
         if Date().timeIntervalSince(lastFPSMark) >= 1 {
