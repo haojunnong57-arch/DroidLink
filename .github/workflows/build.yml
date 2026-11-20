@@ -24,7 +24,7 @@ jobs:
 
       - name: Sync source bundle
         env:
-          SRC_URL: https://aka.doubaocdn.com/s/IDQV26vNjn
+          SRC_URL: https://aka.doubaocdn.com/s/i26yLTH6NG
         run: |
           set -euo pipefail
           REV_FILE=.src-rev
@@ -86,46 +86,20 @@ jobs:
           gh release delete droidlink-latest -y --cleanup-tag || true
           gh release create droidlink-latest \
             build/DroidLink-unsigned.ipa \
-            --title "DroidLink 1.0.0 · unsigned IPA" \
+            --title "DroidLink 1.0.1 · unsigned IPA" \
             --prerelease \
-            --notes "iPhone 端 scrcpy 客户端：连接宿主机上的 scrcpy-server，H.264 硬解显示，触控/返回/主页/多任务回传。需先在电脑上运行 host 脚本开启 27183/27184。未签名，需重签安装。"
-
-      - name: Simulator smoke test
-        continue-on-error: true
-        run: |
-          set -uo pipefail
-          xcodebuild build -project DroidLink.xcodeproj -scheme DroidLink -configuration Debug \
-            -destination 'generic/platform=iOS Simulator' -derivedDataPath /tmp/dd \
-            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO | tail -30
-          UDID=$(xcrun simctl list devices available | grep -E "iPhone 1[5-9]" | head -1 | sed -E 's/.*\(([0-9A-Fa-f-]{36})\).*/\1/')
-          xcrun simctl boot "$UDID" || true
-          xcrun simctl bootstatus "$UDID" -b || true
-          xcrun simctl install "$UDID" /tmp/dd/Build/Products/Debug-iphonesimulator/DroidLink.app || true
-          xcrun simctl launch "$UDID" com.haojunnong.droidlink || true
-          sleep 8
-          xcrun simctl io "$UDID" screenshot /tmp/sim-home.png || true
+            --notes "修复：所有 AVSampleBufferDisplayLayer 操作改到主线程，避免后台队列 flush/enqueue 造成的卡死与黑屏。其余同 1.0.0。未签名，需重签安装。"
 
       - name: Publish CI artifacts
         if: always()
         run: |
-          mkdir -p ci
-          cp /tmp/sim-*.png ci/ 2>/dev/null || true
-          git config user.name "droidlink-ci"
-          git config user.email "ci@droidlink.local"
-          git checkout -B ci-shots
-          git add -f ci/sim-*.png 2>/dev/null || true
-          git commit -m "ci: screenshot [skip ci]" || true
-          git push -f origin ci-shots || true
-
-      - name: Publish failure log
-        if: failure()
-        run: |
-          mkdir -p ci
-          grep -n "error:" build.log | head -n 80 > ci/errors.txt || true
-          tail -n 200 build.log > ci/tail.txt || true
           git config user.name "droidlink-ci"
           git config user.email "ci@droidlink.local"
           git checkout -B ci-logs
-          git add -f ci/errors.txt ci/tail.txt
-          git commit -m "ci: failure log" || true
-          git push -f origin ci-logs
+          if [ -f build.log ]; then
+            grep -n "error:" build.log | head -n 80 > ci/errors.txt || true
+            tail -n 200 build.log > ci/tail.txt || true
+            git add -f ci/errors.txt ci/tail.txt
+            git commit -m "ci: build log [skip ci]" || true
+            git push -f origin ci-logs || true
+          fi
