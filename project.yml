@@ -1,0 +1,48 @@
+name: DroidLink
+options:
+  bundleIdPrefix: com.haojunnong
+  deploymentTarget:
+    iOS: "17.0"
+  createIntermediateGroups: true
+  developmentLanguage: zh-Hans
+
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    DEVELOPMENT_TEAM: ""
+    CODE_SIGN_STYLE: Automatic
+    ENABLE_USER_SCRIPT_SANDBOXING: NO
+
+targets:
+  DroidLink:
+    type: application
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: DroidLink
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.haojunnong.droidlink
+        PRODUCT_NAME: DroidLink
+        GENERATE_INFOPLIST_FILE: "YES"
+        MARKETING_VERSION: "1.0.0"
+        CURRENT_PROJECT_VERSION: "1"
+        TARGETED_DEVICE_FAMILY: "1"
+        ENABLE_PREVIEWS: YES
+        INFOPLIST_KEY_CFBundleDisplayName: DroidLink
+        INFOPLIST_KEY_NSLocalNetworkUsageDescription: DroidLink 需要连接局域网里的电脑，把 Android 画面串流到这台 iPhone。
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UIStatusBarHidden: "YES"
+        INFOPLIST_KEY_UIRequiresFullScreen: "NO"
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
+
+schemes:
+  DroidLink:
+    build:
+      targets:
+        DroidLink: all
+    run:
+      config: Debug
+    archive:
+      config: Release
